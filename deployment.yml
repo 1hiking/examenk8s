@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  labels:
+    app: flask
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: flask
+  template:
+    metadata:
+      labels:
+        app: flask
+    spec:
+      containers:
+      - name: flask
+        image: jcfk/examenbackend
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        env:
+        - name: PG_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgresql
+              key: POSTGRES_USER
+        - name: PG_PASS
+          valueFrom:
+            secretKeyRef:
+              name: postgresql
+              key: POSTGRES_PASSWORD
+        - name: DB_URL
+          value: postgres.default.svc.cluster.local
+        - name: DB_SCHEME
+          valueFrom:
+            secretKeyRef:
+              name: postgresql
+              key: POSTGRES_DB
+        resources:
+    
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  labels:
+    app: frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: php
+  template:
+    metadata:
+      labels:
+        app: php
+    spec:
+      containers:
+      - name: php
+        image: jcfk/examenfrontend
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        resources:
+
