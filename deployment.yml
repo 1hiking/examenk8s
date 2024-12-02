@@ -15,33 +15,32 @@ spec:
         app: flask
     spec:
       containers:
-      - name: flask
-        image: jcfk/examenbackend
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 5000
-        env:
-        - name: PG_USER
-          valueFrom:
-            secretKeyRef:
-              name: postgresql
-              key: POSTGRES_USER
-        - name: PG_PASS
-          valueFrom:
-            secretKeyRef:
-              name: postgresql
-              key: POSTGRES_PASSWORD
-        - name: DB_URL
-          value: postgres.default.svc.cluster.local
-        - name: DB_SCHEME
-          valueFrom:
-            secretKeyRef:
-              name: postgresql
-              key: POSTGRES_DB
-        resources:
-    
----
+        - name: flask
+          image: jcfk/examenbackend:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+          env:
+            - name: PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql
+                  key: POSTGRES_USER
+            - name: PG_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql
+                  key: POSTGRES_PASSWORD
+            - name: DB_URL
+              value: postgres.default.svc.cluster.local
+            - name: DB_SCHEME
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql
+                  key: POSTGRES_DB
+          resources:
 
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -52,17 +51,35 @@ spec:
   replicas: 3
   selector:
     matchLabels:
-      app: php
+      app: frontend
   template:
     metadata:
       labels:
-        app: php
+        app: frontend
     spec:
       containers:
-      - name: php
-        image: jcfk/examenfrontend
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 80
-        resources:
+        - name: php
+          image: jcfk/examenfrontend
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          resources:
+          env:
+            - name: API_URL
+              value: backend.default.svc.cluster.local
 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  ports:
+    - port: 90
+      targetPort: 5000
+      protocol: TCP
+      name: backend
+  selector:
+    app: flask
