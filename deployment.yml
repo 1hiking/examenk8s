@@ -32,7 +32,7 @@ spec:
                   name: postgresql
                   key: POSTGRES_PASSWORD
             - name: DB_URL
-              value: postgres.default.svc.cluster.local
+              value: postgres-0.postgres.default.svc.cluster.local
             - name: DB_SCHEME
               valueFrom:
                 secretKeyRef:
